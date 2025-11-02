@@ -1,24 +1,41 @@
 package org.emp.gl.core.launcher;
 
-import org.emp.gl.clients.Horloge ;
+import java.util.Random;
+import java.util.stream.IntStream;
 
-/**
- * Hello world!
- *
- */
+import org.emp.gl.clients.CompteARebours;
+import org.emp.gl.clients.Horloge;
+import org.emp.gl.clients.HorlogeGraphique;
+import org.emp.gl.time.service.impl.DummyTimeServiceImpl;
+
 public class App {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
-        testDuTimeService();
-    }
+        // 1) Instancie le service
+        DummyTimeServiceImpl timerService = new DummyTimeServiceImpl();
 
-    private static void testDuTimeService() {
-        Horloge horloge = new Horloge("Num 1") ;
-    }
+        // 2) Observers
+        new HorlogeGraphique("Horloge Graphique", timerService);
 
-    public static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        Horloge h1 = new Horloge("Num 1", timerService);
+        Horloge h2 = new Horloge("Num 2", timerService);
+        Horloge h3 = new Horloge("Num 3", timerService);
+
+        // 3) compte à rebours
+        new CompteARebours("CA_5", 5, timerService);
+
+        Random rnd = new Random();
+        IntStream.range(0, 10).forEach(i -> {
+            int initial = 10 + rnd.nextInt(11);
+            new CompteARebours("CA_" + i, initial, timerService);
+        });
+
+        // 4) laisser tourner 1 minute
+        Thread.sleep(60_000);
+
+        // 5) arrêter proprement
+        timerService.shutdown();
+        System.out.println("Application terminée.");
     }
 }
